@@ -62,7 +62,7 @@
           <textarea id="prompt" rows="3" class="form-control" placeholder="Enter prompt"></textarea>
         </div>
         <div class="mb-3">
-          <label class="form-label text-secondary">Select Metrics</label>
+          <label class="form-label text-secondary">Select Metrics (optional)</label>
           <div id="metrics-container" class="metrics-grid"></div>
         </div>
         <button id="submit-btn" class="btn btn-success w-100">Generate &amp; Eval</button>
@@ -70,8 +70,10 @@
       <div id="output" class="mt-4" style="display:none;">
         <h2 class="h6 text-secondary">Response</h2>
         <code id="response-text" class="p-3 rounded"></code>
-        <h2 class="h6 text-secondary mt-3">Evaluation Results</h2>
-        <div id="eval-results" class="row g-3"></div>
+        <div id="results-section">
+          <h2 class="h6 text-secondary mt-3">Evaluation Results</h2>
+          <div id="eval-results" class="row g-3"></div>
+        </div>
       </div>
       <div id="error" class="alert alert-danger mt-3" style="display:none;"></div>
     </div>
@@ -89,6 +91,7 @@
           evalResults = document.getElementById('eval-results'),
           output = document.getElementById('output'),
           metricsContainer = document.getElementById('metrics-container'),
+          resultsSection = document.getElementById('results-section'),
           toastContainer = document.getElementById('toast-container');
 
     let credentials = null;
@@ -136,8 +139,8 @@
     document.getElementById('submit-btn').addEventListener('click', async () => {
       const userPrompt = document.getElementById('prompt').value.trim();
       const metrics = Array.from(metricsContainer.querySelectorAll('input:checked')).map(i => i.value);
-      if (!userPrompt || !metrics.length) return;
 
+      if (!userPrompt) return;
       showError('');
       overlay.style.display = 'flex';
       output.style.display = 'block';
@@ -145,44 +148,49 @@
       evalResults.innerHTML = '';
 
       try {
+        const payload = {
+          messages: [{ role: 'user', content: userPrompt }],
+          model: 'sonar-pro'
+        };
+        if (metrics.length) {
+          payload.eval_config = { enabled: true, metrics, wait_for_results: true };
+          resultsSection.style.display = 'block';
+        } else {
+          payload.eval_config = { enabled: false, metrics: [], wait_for_results: false };
+          resultsSection.style.display = 'none';
+        }
+
         const res = await fetch('https://custom-metric-playground.vercel.app/v1/llm/generate_with_eval', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Basic ' + credentials
           },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: userPrompt }],
-            model: 'sonar-pro',
-            eval_config: { enabled: true, metrics, wait_for_results: true }
-          })
+          body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error(res.statusText);
         const data = await res.json();
         responseText.textContent = data.response;
 
-        // Render metric cards
-        const container = evalResults;
-        container.innerHTML = '';
-        Object.entries(data.evaluation.results).forEach(([metric, result]) => {
-          const col = document.createElement('div');
-          col.className = 'col-md-6';
-          const card = document.createElement('div');
-          card.className = 'metric-card text-light';
-          card.innerHTML = `
-            <div class="metric-title">${metric}</div>
-            <ul class="metric-list">
-              ${Object.entries(result).map(([k,v]) =>
-                `<li><strong>${k}</strong><span>${v}</span></li>`
-              ).join('')}
-            </ul>`;
-          col.append(card);
-          container.append(col);
-        });
-
-        // Notify skipped metrics
-        if (data.evaluation.skipped_metrics?.length) {
-          showToast(`Skipped: ${data.evaluation.skipped_metrics.join(', ')}`);
+        if (metrics.length) {
+          const container = evalResults;
+          container.innerHTML = '';
+          Object.entries(data.evaluation.results).forEach(([metric, result]) => {
+            const col = document.createElement('div');
+            col.className = 'col-md-6';
+            const card = document.createElement('div');
+            card.className = 'metric-card text-light';
+            card.innerHTML = `
+              <div class="metric-title">${metric}</div>
+              <ul class="metric-list">
+                ${Object.entries(result).map(([k,v]) =>
+                  `<li><strong>${k}</strong><span>${v}</span></li>`
+                ).join('')}
+              </ul>`;
+            col.append(card);
+            container.append(col);
+          });
+          (data.evaluation.skipped_metrics || []).forEach(msg => showSkipped(msg));
         }
       } catch (err) {
         showError('Error: ' + err.message);
@@ -201,9 +209,9 @@
       setTimeout(() => { errorBox.style.display = 'none'; }, 5000);
     }
 
-    function showToast(message) {
+    function showSkipped(message) {
       const toastEl = document.createElement('div');
-      toastEl.className = 'toast align-items-center text-bg-secondary border-0';
+      toastEl.className = 'toast align-items-center text-bg-danger border-0';
       toastEl.setAttribute('role','alert');
       toastEl.innerHTML = `
         <div class="d-flex">
@@ -211,9 +219,9 @@
           <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>`;
       toastContainer.append(toastEl);
-      const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+      const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
       toast.show();
-      toastEl.addEventListener('hidden.bs.toast', ()=> toastEl.remove());
+      toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
     }
   </script>
 </body>
