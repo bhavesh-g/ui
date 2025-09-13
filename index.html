@@ -67,14 +67,13 @@
     const output = document.getElementById('output');
     const responseText = document.getElementById('response-text');
     const evalResults = document.getElementById('eval-results');
-
     let credentials = null;
 
     authForm.addEventListener('submit', e => {
       e.preventDefault();
       const user = document.getElementById('username').value;
       const pass = document.getElementById('password').value;
-      credentials = btoa(\`\${user}:\${pass}\`);
+      credentials = btoa(`${user}:${pass}`);
       authForm.style.display = 'none';
       generator.style.display = 'block';
     });
@@ -89,7 +88,7 @@
       output.style.display = 'block';
 
       try {
-        const res = await fetch('/v1/llm/generate_with_eval', {
+        const res = await fetch('https://custom-metric-playground.vercel.app/v1/llm/generate_with_eval', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -107,7 +106,7 @@
         const results = data.evaluation?.results || {};
         for (const [metric, result] of Object.entries(results)) {
           const li = document.createElement('li');
-          li.innerHTML = \`<span class="badge text-light">\${metric}</span>: \${JSON.stringify(result)}\`;
+          li.innerHTML = `<span class="badge text-light">${metric}</span>: ${JSON.stringify(result)}`;
           evalResults.appendChild(li);
         }
       } catch (err) {
