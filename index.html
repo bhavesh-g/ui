@@ -11,8 +11,26 @@
     .light { background-color: #f8f9fa; color: #212529; }
     .card { border: none; border-radius: .5rem; }
     .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); gap:.75rem; }
-    .overlay { position:fixed; top:0;left:0;width:100%;height:100%; background:rgba(0,0,0,0.7);
-      color:#fff; display:flex; align-items:center;justify-content:center; font-size:1.5rem; z-index:1000; display:none; }
+    .overlay {
+      position: fixed; top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.7); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem; z-index:1000; display:none;
+    }
+    .metric-card {
+      background-color: #2a2a2a; border-radius: .5rem;
+      padding: 1rem; transition: transform .2s;
+    }
+    .metric-card:hover { transform: translateY(-4px); }
+    .metric-title {
+      font-weight: 600; font-size: 1.1rem; margin-bottom: .5rem;
+    }
+    .metric-list { list-style: none; padding: 0; margin: 0; }
+    .metric-list li {
+      display: flex; justify-content: space-between;
+      padding: .25rem 0; border-bottom: 1px solid #3a3a3a;
+    }
+    .metric-list li:last-child { border-bottom: none; }
   </style>
 </head>
 <body class="dark">
@@ -50,8 +68,8 @@
       <div id="output" class="mt-4" style="display:none;">
         <h2 class="h6 text-secondary">Response</h2>
         <pre id="response-text" class="p-3 bg-light rounded"></pre>
-        <h2 class="h6 text-secondary mt-3">Results</h2>
-        <ul id="eval-results" class="list-unstyled"></ul>
+        <h2 class="h6 text-secondary mt-3">Evaluation Results</h2>
+        <div id="eval-results" class="row g-3"></div>
       </div>
       <div id="error" class="alert alert-danger mt-3" style="display:none;"></div>
     </div>
@@ -107,7 +125,7 @@
             </div>`;
           metricsContainer.append(cb);
         });
-      } catch (err) {
+      } catch {
         showError('Failed to load metrics');
       }
     }
@@ -139,10 +157,24 @@
         if (!res.ok) throw new Error(res.statusText);
         const data = await res.json();
         responseText.textContent = data.response;
-        Object.entries(data.evaluation.results).forEach(([m, r]) => {
-          const li = document.createElement('li');
-          li.innerHTML = `<span class="badge bg-secondary me-2">${m}</span>${JSON.stringify(r)}`;
-          evalResults.append(li);
+
+        // Render metric cards
+        const container = evalResults;
+        container.innerHTML = '';
+        Object.entries(data.evaluation.results).forEach(([metric, result]) => {
+          const col = document.createElement('div');
+          col.className = 'col-md-6';
+          const card = document.createElement('div');
+          card.className = 'metric-card text-light';
+          card.innerHTML = `
+            <div class="metric-title">${metric}</div>
+            <ul class="metric-list">
+              ${Object.entries(result).map(([k,v]) =>
+                `<li><strong>${k}</strong><span>${v}</span></li>`
+              ).join('')}
+            </ul>`;
+          col.append(card);
+          container.append(col);
         });
       } catch (err) {
         showError('Error: ' + err.message);
@@ -152,7 +184,10 @@
     });
 
     function showError(msg) {
-      if (!msg) return errorBox.style.display = 'none';
+      if (!msg) {
+        errorBox.style.display = 'none';
+        return;
+      }
       errorBox.textContent = msg;
       errorBox.style.display = 'block';
       setTimeout(() => { errorBox.style.display = 'none'; }, 5000);
