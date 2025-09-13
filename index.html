@@ -70,92 +70,92 @@
           output = document.getElementById('output'),
           metricsContainer = document.getElementById('metrics-container');
 
-    let credentials=null;
-    themeBtn.addEventListener('click',()=>{
-      const body=document.body;
-      if(body.classList.toggle('light')){
-        body.classList.remove('dark');
-        themeBtn.textContent='Dark Mode';
-      } else {
-        body.classList.add('dark');
-        themeBtn.textContent='Light Mode';
-      }
-    });
-    editLogin.addEventListener('click',()=>{
-      generator.style.display='none';
-      authForm.style.display='block';
+    let credentials = null;
+
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light');
+      document.body.classList.toggle('dark');
+      themeBtn.textContent = document.body.classList.contains('light') ? 'Dark Mode' : 'Light Mode';
     });
 
-    authForm.addEventListener('submit', async e=>{
+    editLogin.addEventListener('click', () => {
+      generator.style.display = 'none';
+      authForm.style.display = 'block';
+    });
+
+    authForm.addEventListener('submit', async e => {
       e.preventDefault();
-      credentials=btoa(`${username.value}:${password.value}`);
-      authForm.style.display='none';
+      credentials = btoa(`${username.value}:${password.value}`);
+      authForm.style.display = 'none';
       await fetchMetrics();
-      generator.style.display='block';
+      generator.style.display = 'block';
     });
 
-    async function fetchMetrics(){
-      metricsContainer.innerHTML='';
+    async function fetchMetrics() {
+      metricsContainer.innerHTML = '';
       try {
-        const res=await fetch('https://custom-metric-playground.vercel.app/v1/preset_metric/list',{
-          headers:{ 'Authorization':'Basic '+credentials }
+        const res = await fetch('https://custom-metric-playground.vercel.app/v1/preset_metric/list', {
+          headers: { 'Authorization': 'Basic ' + credentials }
         });
-        const {metrics}=await res.json();
-        Object.keys(metrics).forEach(name=>{
-          const cb=document.createElement('div');
-          cb.innerHTML=`
+        const { metrics } = await res.json();
+        Object.keys(metrics).forEach(name => {
+          const cb = document.createElement('div');
+          cb.innerHTML = `
             <div class="form-check">
               <input class="form-check-input" type="checkbox" value="${name}" id="m_${name}">
               <label class="form-check-label" for="m_${name}">${name}</label>
             </div>`;
           metricsContainer.append(cb);
         });
-      } catch(err){
+      } catch (err) {
         showError('Failed to load metrics');
       }
     }
 
-    document.getElementById('submit-btn').addEventListener('click',async()=>{
-      const prompt=prompt.value.trim();
-      const metrics=Array.from(metricsContainer.querySelectorAll('input:checked'))
-                         .map(i=>i.value);
-      if(!prompt||!metrics.length) return;
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+      const userPrompt = document.getElementById('prompt').value.trim();
+      const metrics = Array.from(metricsContainer.querySelectorAll('input:checked')).map(i => i.value);
+      if (!userPrompt || !metrics.length) return;
+
       showError('');
-      overlay.style.display='flex';
-      output.style.display='block';
-      responseText.textContent=''; evalResults.innerHTML='';
+      overlay.style.display = 'flex';
+      output.style.display = 'block';
+      responseText.textContent = '';
+      evalResults.innerHTML = '';
+
       try {
-        const res=await fetch('https://custom-metric-playground.vercel.app/v1/llm/generate_with_eval',{
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'Authorization':'Basic '+credentials
+        const res = await fetch('https://custom-metric-playground.vercel.app/v1/llm/generate_with_eval', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + credentials
           },
-          body:JSON.stringify({
-            messages:[{role:'user',content:prompt}],
-            model:'sonar-pro',
-            eval_config:{enabled:true,metrics,wait_for_results:true}
+          body: JSON.stringify({
+            messages: [{ role: 'user', content: userPrompt }],
+            model: 'sonar-pro',
+            eval_config: { enabled: true, metrics, wait_for_results: true }
           })
         });
-        if(!res.ok) throw new Error(res.statusText);
-        const data=await res.json();
-        responseText.textContent=data.response;
-        Object.entries(data.evaluation.results).forEach(([m,r])=>{
-          const li=document.createElement('li');
-          li.innerHTML=`<span class="badge bg-secondary me-2">${m}</span>${JSON.stringify(r)}`;
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        responseText.textContent = data.response;
+        Object.entries(data.evaluation.results).forEach(([m, r]) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="badge bg-secondary me-2">${m}</span>${JSON.stringify(r)}`;
           evalResults.append(li);
         });
-      } catch(err){
-        showError('Error: '+err.message);
+      } catch (err) {
+        showError('Error: ' + err.message);
       } finally {
-        overlay.style.display='none';
+        overlay.style.display = 'none';
       }
     });
 
-    function showError(msg){
-      if(!msg) return errorBox.style.display='none';
-      errorBox.textContent=msg;
-      errorBox.style.display='block';
+    function showError(msg) {
+      if (!msg) return errorBox.style.display = 'none';
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+      setTimeout(() => { errorBox.style.display = 'none'; }, 5000);
     }
   </script>
 </body>
