@@ -75,4 +75,94 @@
     // Theme toggle
     toggleThemeBtn.addEventListener('click',()=>{
       const html = document.documentElement;
-      html.dataset.bsTheme = html.dataset.bsTheme==='light
+      html.dataset.bsTheme = html.dataset.bsTheme==='light'?'dark':'light';
+      toggleThemeBtn.textContent = html.dataset.bsTheme==='light'?'Toggle Dark':'Toggle Light';
+    });
+
+    // Load metrics dynamically
+    async function loadMetrics(){
+      try {
+        const res = await fetch(apiBase+'/v1/preset_metric/list',{
+          headers: { 'Authorization':'Basic '+credentials }
+        });
+        const data = await res.json();
+        metricsContainer.innerHTML='';
+        Object.keys(data.metrics).forEach(name=>{
+          const div = document.createElement('div');
+          div.innerHTML = `
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="${name}" id="m_${name}">
+              <label class="form-check-label text-light" for="m_${name}">${name}</label>
+            </div>`;
+          metricsContainer.append(div);
+        });
+        // apply saved preset
+        presets.forEach(name=>{
+          const cb = document.getElementById('m_'+name);
+          if(cb) cb.checked = true;
+        });
+      } catch(e){
+        console.error('Fetching metrics failed',e);
+      }
+    }
+
+    // Save current selection as preset
+    savePresetBtn.addEventListener('click',e=>{
+      e.preventDefault();
+      presets = Array.from(metricsContainer.querySelectorAll('input:checked')).map(i=>i.value);
+      localStorage.setItem('metricPreset', JSON.stringify(presets));
+      savePresetBtn.textContent='Preset Saved!';
+      setTimeout(()=> savePresetBtn.textContent='Save Preset',1500);
+    });
+
+    // Auth form
+    authForm.addEventListener('submit',async e=>{
+      e.preventDefault();
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      credentials = btoa(`${user}:${pass}`);
+      // preload metrics
+      await loadMetrics();
+      authForm.style.display='none';
+      generator.style.display='block';
+    });
+
+    // Submit
+    document.getElementById('submit-btn').addEventListener('click',async ()=>{
+      const prompt = document.getElementById('prompt').value.trim();
+      if(!prompt) return;
+      const metrics = Array.from(metricsContainer.querySelectorAll('input:checked')).map(i=>i.value);
+      overlay.style.display='flex';
+      document.getElementById('response-text').textContent='';
+      document.getElementById('eval-results').innerHTML='';
+      document.getElementById('output').style.display='block';
+      try {
+        const res = await fetch(apiBase+'/v1/llm/generate_with_eval',{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization':'Basic '+credentials
+          },
+          body: JSON.stringify({
+            messages:[{role:'user',content:prompt}],
+            model:'sonar-pro',
+            eval_config:{enabled:true,metrics,wait_for_results:true}
+          })
+        });
+        if(!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        document.getElementById('response-text').textContent = data.response;
+        (data.evaluation?.results||{}).forEach?.()||Object.entries(data.evaluation.results).forEach(([m,r])=>{
+          const li=document.createElement('li');
+          li.innerHTML=`<span class="badge bg-secondary me-2">${m}</span>${JSON.stringify(r)}`;
+          document.getElementById('eval-results').append(li);
+        });
+      } catch(err){
+        document.getElementById('response-text').textContent='Error: '+err.message;
+      } finally {
+        overlay.style.display='none';
+      }
+    });
+  </script>
+</body>
+</html>
