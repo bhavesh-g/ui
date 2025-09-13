@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LLM Generate & Evaluate</title>
-  <meta name="description" content="Advanced LLM Generation and Evaluation Platform">
+  <title>PromptLab - AI Response Generation & Performance Evaluation Platform</title>
+  <meta name="description" content="Professional AI testing platform for LLM response generation and performance evaluation. Test prompts, analyze metrics, and optimize AI outputs with real-time evaluation tools.">
+  <meta name="keywords" content="AI testing, LLM evaluation, prompt engineering, AI metrics, response analysis, AI performance, machine learning evaluation">
+  <meta name="author" content="PromptLab">
+  <link rel="canonical" href="#">
+  <meta property="og:title" content="PromptLab - AI Performance Evaluation Platform">
+  <meta property="og:description" content="Professional AI testing platform for LLM response generation and performance evaluation.">
+  <meta property="og:type" content="website">
   <style>
     /* Design System Variables */
     :root {
@@ -100,7 +106,7 @@
     }
 
     .header-actions {
-      display: flex;
+/*       display: flex; */
       gap: 0.75rem;
       grid-column: 3;
       justify-self: end;
@@ -515,7 +521,7 @@
   <div class="overlay" id="overlay">
     <div class="loading-content">
       <div class="loading-spinner"></div>
-      <div>Generating & Evaluating...</div>
+      <div>AI Processing...</div>
     </div>
   </div>
 
@@ -523,7 +529,8 @@
 
   <div class="container">
     <header class="header">
-      <h1 class="title">LLM Generate & Evaluate</h1>
+      <h1 class="title">PromptLab</h1>
+      <p style="text-align: center; color: var(--text-secondary); font-size: 1.1rem; margin-top: 0.5rem; font-weight: 400; grid-column: 2;">AI Performance Testing & Evaluation Platform</p>
       <div class="header-actions">
         <button id="theme-btn" class="btn btn-outline">
           Dark Mode
@@ -537,7 +544,7 @@
     <main class="card">
       <!-- Authentication Form -->
       <form id="auth-form" class="fade-in">
-        <div class="section-header">Authentication</div>
+        <div class="section-header">Secure Access</div>
         <div class="form-group">
           <label class="form-label" for="username">Username</label>
           <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
@@ -547,25 +554,25 @@
           <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">
-          Login & Continue
+          Access PromptLab
         </button>
       </form>
 
       <!-- Generator Section -->
       <div id="generator" class="hidden">
-        <div class="section-header">Generate</div>
+        <div class="section-header">Prompt Engineering</div>
         <div class="form-group">
           <label class="form-label" for="prompt">Prompt</label>
-          <textarea id="prompt" rows="4" class="form-control" placeholder="Enter your prompt for the LLM..."></textarea>
+          <textarea id="prompt" rows="4" class="form-control" placeholder="Describe your AI prompt for testing and evaluation..."></textarea>
         </div>
         
         <div class="form-group">
-          <label class="form-label">Evaluation Metrics</label>
+          <label class="form-label">Performance Metrics</label>
           <div id="metrics-container" class="metrics-grid"></div>
         </div>
         
         <button id="submit-btn" class="btn btn-success" style="width: 100%;">
-          Generate & Evaluate
+          Run AI Analysis
         </button>
       </div>
 
