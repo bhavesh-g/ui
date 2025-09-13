@@ -1,760 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Metric Playground</title>
-    <!-- CDN-based resources -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <style>
-        :root {
-            --bg-color: #1a1a1a;
-            --surface-color: #2c2c2c;
-            --primary-text-color: #ffffff;
-            --secondary-text-color: #b3b3b3;
-            --accent-color: #4d90fe;
-            --border-color: #444444;
-            --error-color: #ff6b6b;
-            --success-color: #6bff9f;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            background-color: var(--bg-color);
-            color: var(--primary-text-color);
-            line-height: 1.6;
-        }
-
-        #root {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background-color: var(--surface-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        h1, h2, h3 {
-            color: var(--primary-text-color);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.5rem;
-            margin-top: 0;
-        }
-
-        button {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-        button:hover {
-            background-color: #357ae8;
-            transform: translateY(-1px);
-        }
-        
-        button:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .input, textarea, select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 1rem;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: var(--primary-text-color);
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-        
-        textarea {
-            min-height: 120px;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--secondary-text-color);
-            font-weight: bold;
-        }
-
-        .login-screen {
-            max-width: 400px;
-            margin: auto;
-        }
-        
-        .category-selection {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .category-card {
-            background-color: var(--bg-color);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .category-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
-        
-        .category-card h3 {
-            margin-top: 0;
-            color: var(--accent-color);
-        }
-
-        .response-view {
-            margin-top: 2rem;
-            padding: 1rem;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: 'Courier New', Courier, monospace;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        
-        .response-view.success {
-            border-left: 4px solid var(--success-color);
-        }
-        
-        .response-view.error {
-            border-left: 4px solid var(--error-color);
-            color: var(--error-color);
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        
-        .nav-button {
-            background: none;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
-        }
-        
-        .nav-button:hover {
-            background-color: var(--accent-color);
-            color: white;
-        }
-        
-        .key-value-pair {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: center;
-        }
-        
-        .key-value-pair input {
-            margin-bottom: 0;
-        }
-        
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 4px solid var(--accent-color);
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 2rem auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLM Generate & Evaluate</title>
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #121212; color: #e0e0e0; }
+    .card { background-color: #1e1e1e; border: none; border-radius: .5rem; }
+    .form-control, .btn { border-radius: .375rem; }
+    .metrics-list { list-style: none; padding: 0; }
+    .metrics-list li { display: inline-block; margin-right: .5rem; }
+    .metrics-list li .badge { background-color: #333; }
+    pre { background-color: #1e1e1e; padding: 1rem; border-radius: .5rem; overflow-x: auto; }
+  </style>
 </head>
 <body>
-    <div id="root"></div>
+  <div class="container py-5">
+    <div class="text-center mb-4">
+      <h1 class="fw-bold">LLM Generate &amp; Evaluate</h1>
+      <small class="text-muted">Single-page interface</small>
+    </div>
+    <div class="card p-4 mx-auto" style="max-width: 800px;">
+      <form id="auth-form" class="mb-4">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" id="username" class="form-control bg-dark text-light" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" id="password" class="form-control bg-dark text-light" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Login &amp; Generate</button>
+      </form>
+      <div id="generator" style="display:none;">
+        <div class="mb-3">
+          <label class="form-label">Prompt</label>
+          <textarea id="prompt" rows="3" class="form-control bg-dark text-light" placeholder="Enter your prompt"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Metrics</label>
+          <select multiple id="metrics" class="form-select bg-dark text-light">
+            <option value="helpfulness" selected>helpfulness</option>
+            <option value="toxicity" selected>toxicity</option>
+            <option value="relevance" selected>relevance</option>
+            <option value="coherence">coherence</option>
+            <option value="conciseness">conciseness</option>
+          </select>
+        </div>
+        <button id="submit-btn" class="btn btn-success w-100">Generate &amp; Eval</button>
+      </div>
+      <div id="output" class="mt-4" style="display:none;">
+        <h5>Response</h5>
+        <pre id="response-text">...</pre>
+        <h5>Evaluation Results</h5>
+        <ul id="eval-results" class="metrics-list"></ul>
+      </div>
+    </div>
+  </div>
 
-    <script type="text/babel">
-        const { useState, createContext, useContext, useEffect } = React;
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const authForm = document.getElementById('auth-form');
+    const generator = document.getElementById('generator');
+    const output = document.getElementById('output');
+    const responseText = document.getElementById('response-text');
+    const evalResults = document.getElementById('eval-results');
 
-        const API_BASE_URL = "https://custom-metric-playground.vercel.app"; // IMPORTANT: Replace with your API URL
-        const AuthContext = createContext(null);
+    let credentials = null;
 
-        // Helper for making authenticated API calls
-        const useApi = () => {
-            const { username, password } = useContext(AuthContext);
-            const [loading, setLoading] = useState(false);
-            const [error, setError] = useState(null);
+    authForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      credentials = btoa(\`\${user}:\${pass}\`);
+      authForm.style.display = 'none';
+      generator.style.display = 'block';
+    });
 
-            const apiFetch = async (endpoint, method = 'GET', body = null) => {
-                setLoading(true);
-                setError(null);
-                try {
-                    if (!API_BASE_URL || API_BASE_URL === "YOUR_API_BASE_URL_HERE") {
-                      throw new Error("API_BASE_URL is not configured. Please edit the HTML file.");
-                    }
-                    const headers = new Headers();
-                    headers.append('Content-Type', 'application/json');
-                    if (username && password) {
-                        headers.append('Authorization', 'Basic ' + btoa(username + ":" + password));
-                    }
-                    
-                    const options = {
-                        method,
-                        headers,
-                        body: body ? JSON.stringify(body) : null,
-                    };
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+      const prompt = document.getElementById('prompt').value.trim();
+      const metrics = Array.from(document.getElementById('metrics').selectedOptions).map(o=>o.value);
+      if (!prompt) return;
 
-                    const response = await fetch(API_BASE_URL + endpoint, options);
-                    const data = await response.json();
+      responseText.textContent = 'Loading...';
+      evalResults.innerHTML = '';
+      output.style.display = 'block';
 
-                    if (!response.ok) {
-                        throw data;
-                    }
-                    return data;
-                } catch (err) {
-                    console.error("API Error:", err);
-                    setError(err);
-                    return null;
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            return { apiFetch, loading, error, setError };
-        };
-
-        const AuthProvider = ({ children }) => {
-            const [user, setUser] = useState(null);
-
-            const login = (username, password) => {
-                setUser({ username, password });
-            };
-
-            const logout = () => {
-                setUser(null);
-            };
-
-            const authContextValue = {
-                username: user?.username,
-                password: user?.password,
-                isLoggedIn: !!user,
-                login,
-                logout,
-            };
-
-            return (
-                <AuthContext.Provider value={authContextValue}>
-                    {children}
-                </AuthContext.Provider>
-            );
-        };
-        
-        // --- Shared Components ---
-
-        const Loader = () => <div className="spinner"></div>;
-
-        const ResponseDisplay = ({ title, data, error }) => {
-            if (!data && !error) return null;
-            const content = error ? JSON.stringify(error, null, 2) : JSON.stringify(data, null, 2);
-            return (
-                <div className="response-view-container">
-                    <h3>{title}</h3>
-                    <pre className={`response-view ${error ? 'error' : 'success'}`}>{content}</pre>
-                </div>
-            );
-        };
-        
-        const KeyValueEditor = ({ value, onChange, title, keyPlaceholder, valuePlaceholder }) => {
-            const handleAdd = () => {
-                onChange([...value, { id: Date.now(), key: '', value: '' }]);
-            };
-
-            const handleUpdate = (id, field, fieldValue) => {
-                onChange(value.map(item => item.id === id ? { ...item, [field]: fieldValue } : item));
-            };
-
-            const handleRemove = (id) => {
-                onChange(value.filter(item => item.id !== id));
-            };
-            
-            return (
-                <div className="form-group">
-                    <label className="label">{title}</label>
-                    {value.map(item => (
-                        <div key={item.id} className="key-value-pair">
-                            <input
-                                type="text"
-                                className="input"
-                                placeholder={keyPlaceholder}
-                                value={item.key}
-                                onChange={(e) => handleUpdate(item.id, 'key', e.target.value)}
-                            />
-                            <input
-                                type="text"
-                                className="input"
-                                placeholder={valuePlaceholder}
-                                value={item.value}
-                                onChange={(e) => handleUpdate(item.id, 'value', e.target.value)}
-                            />
-                            <button type="button" onClick={() => handleRemove(item.id)}>&times;</button>
-                        </div>
-                    ))}
-                    <button type="button" onClick={handleAdd}>Add Item</button>
-                </div>
-            );
-        };
-
-        // --- Screens and Views ---
-
-        const LoginScreen = () => {
-            const [username, setUsername] = useState('');
-            const [password, setPassword] = useState('');
-            const { login } = useContext(AuthContext);
-
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (username && password) {
-                    login(username, password);
-                }
-            };
-
-            return (
-                <div className="container login-screen">
-                    <h1>Login to Playground</h1>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label className="label" htmlFor="username">Username</label>
-                            <input
-                                id="username"
-                                type="text"
-                                className="input"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label className="label" htmlFor="password">Password</label>
-                            <input
-                                id="password"
-                                type="password"
-                                className="input"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <button type="submit">Login</button>
-                    </form>
-                </div>
-            );
-        };
-
-        const CategorySelectionScreen = ({ onSelectCategory, onLogout }) => {
-            return (
-                <div className="container">
-                     <div className="header">
-                        <h1>Select Evaluation Category</h1>
-                        <button onClick={onLogout} className="nav-button">Logout</button>
-                    </div>
-                    <div className="category-selection">
-                        <div className="category-card" onClick={() => onSelectCategory('preset')}>
-                            <h3>Preset Metrics</h3>
-                            <p>Evaluate using predefined metrics like helpfulness, faithfulness, and BLEU.</p>
-                        </div>
-                        <div className="category-card" onClick={() => onSelectCategory('custom')}>
-                            <h3>Custom Metrics</h3>
-                            <p>Define your own evaluation metric with a custom prompt, schema, and logic.</p>
-                        </div>
-                        <div className="category-card" onClick={() => onSelectCategory('deepeval')}>
-                            <h3>DeepEval</h3>
-                            <p>Leverage powerful, research-backed metrics from the DeepEval framework.</p>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const PresetMetricsView = ({ onBack }) => {
-            const { apiFetch, loading, error, setError } = useApi();
-            const [metrics, setMetrics] = useState([]);
-            const [selectedMetrics, setSelectedMetrics] = useState([]);
-            const [testCaseParams, setTestCaseParams] = useState([{ id: Date.now(), key: '', value: '' }]);
-            const [result, setResult] = useState(null);
-
-            useEffect(() => {
-                apiFetch('/v1/preset_metric/list').then(data => {
-                    if (data) setMetrics(data);
-                });
-            }, []);
-
-            const handleMetricToggle = (metric) => {
-                setSelectedMetrics(prev => 
-                    prev.includes(metric) ? prev.filter(m => m !== metric) : [...prev, metric]
-                );
-            };
-
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                setError(null);
-                setResult(null);
-
-                const params = testCaseParams.reduce((acc, { key, value }) => {
-                    if (key) acc[key] = value;
-                    return acc;
-                }, {});
-
-                let response;
-                if (selectedMetrics.length === 1) {
-                    response = await apiFetch('/v1/preset_metric/evaluate', 'POST', {
-                        metric: selectedMetrics[0],
-                        test_case_params: params,
-                    });
-                } else {
-                    response = await apiFetch('/v1/preset_metric/multi_evaluate', 'POST', {
-                        metrics: selectedMetrics,
-                        test_case_params: params,
-                    });
-                }
-                if (response) setResult(response);
-            };
-            
-            return (
-                <div className="container">
-                    <div className="header">
-                        <h2>Preset Metrics</h2>
-                        <button onClick={onBack} className="nav-button">Back to Categories</button>
-                    </div>
-
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label className="label">Select Metrics</label>
-                            {metrics.length > 0 ? (
-                                metrics.map(metric => (
-                                    <div key={metric}>
-                                        <input
-                                            type="checkbox"
-                                            id={`metric-${metric}`}
-                                            checked={selectedMetrics.includes(metric)}
-                                            onChange={() => handleMetricToggle(metric)}
-                                        />
-                                        <label htmlFor={`metric-${metric}`} style={{marginLeft: "8px"}}>{metric}</label>
-                                    </div>
-                                ))
-                            ) : <p>Loading metrics...</p>}
-                        </div>
-
-                        <KeyValueEditor 
-                            value={testCaseParams} 
-                            onChange={setTestCaseParams}
-                            title="Test Case Parameters"
-                            keyPlaceholder="e.g., user, response, context"
-                            valuePlaceholder="Parameter value"
-                        />
-
-                        <button type="submit" disabled={loading || selectedMetrics.length === 0}>
-                            {loading ? 'Evaluating...' : 'Evaluate'}
-                        </button>
-                    </form>
-
-                    {loading && <Loader />}
-                    <ResponseDisplay title="Evaluation Result" data={result} error={error} />
-                </div>
-            );
-        };
-
-        const CustomMetricView = ({ onBack }) => {
-            const { apiFetch, loading, error, setError } = useApi();
-            const [formState, setFormState] = useState({
-                name: 'Custom Helpfulness',
-                prompt_template: 'User: {{user}}\nResponse: {{response}}\nReturn JSON {"score": float, "explanation": string<=50}.',
-                input_fields: 'user, response',
-                output_schema: [{ id: Date.now(), key: 'score', value: 'float 0-1' }],
-                test_case_params: [{ id: Date.now(), key: 'user', value: '' }],
-                post_process_code: ''
-            });
-            const [result, setResult] = useState(null);
-
-            const handleChange = (field, value) => {
-                setFormState(prev => ({ ...prev, [field]: value }));
-            };
-
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                setError(null);
-                setResult(null);
-
-                const payload = {
-                    name: formState.name,
-                    prompt_template: formState.prompt_template,
-                    input_fields: formState.input_fields.split(',').map(s => s.trim()).filter(Boolean),
-                    output_schema: formState.output_schema.reduce((acc, { key, value }) => {
-                        if (key) acc[key] = value;
-                        return acc;
-                    }, {}),
-                    test_case_params: formState.test_case_params.reduce((acc, { key, value }) => {
-                        if (key) acc[key] = value;
-                        return acc;
-                    }, {}),
-                    model: 'sonar-pro'
-                };
-                if (formState.post_process_code) {
-                    payload.post_process_code = formState.post_process_code;
-                }
-
-                const response = await apiFetch('/v1/custom_metric/evaluate', 'POST', payload);
-                if (response) setResult(response);
-            };
-
-            return (
-                <div className="container">
-                    <div className="header">
-                        <h2>Custom Metric Evaluation</h2>
-                        <button onClick={onBack} className="nav-button">Back to Categories</button>
-                    </div>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label className="label">Metric Name</label>
-                            <input type="text" className="input" value={formState.name} onChange={e => handleChange('name', e.target.value)} />
-                        </div>
-                         <div className="form-group">
-                            <label className="label">Prompt Template (Jinja2)</label>
-                            <textarea className="input" value={formState.prompt_template} onChange={e => handleChange('prompt_template', e.target.value)}></textarea>
-                        </div>
-                         <div className="form-group">
-                            <label className="label">Input Fields (comma-separated)</label>
-                            <input type="text" className="input" value={formState.input_fields} onChange={e => handleChange('input_fields', e.target.value)} />
-                        </div>
-                        <KeyValueEditor
-                            value={formState.output_schema}
-                            onChange={value => handleChange('output_schema', value)}
-                            title="Output Schema"
-                            keyPlaceholder="e.g., score"
-                            valuePlaceholder="e.g., float 0-1"
-                        />
-                        <KeyValueEditor
-                            value={formState.test_case_params}
-                            onChange={value => handleChange('test_case_params', value)}
-                            title="Test Case Parameters"
-                            keyPlaceholder="e.g., user"
-                            valuePlaceholder="Test value"
-                        />
-                         <div className="form-group">
-                            <label className="label">Post-Process Code (Optional Python)</label>
-                            <textarea className="input" value={formState.post_process_code} onChange={e => handleChange('post_process_code', e.target.value)} placeholder="def postprocess(parsed, request): ..."></textarea>
-                        </div>
-
-                        <button type="submit" disabled={loading}>
-                            {loading ? 'Evaluating...' : 'Evaluate Custom Metric'}
-                        </button>
-                    </form>
-
-                    {loading && <Loader />}
-                    <ResponseDisplay title="Evaluation Result" data={result} error={error} />
-                </div>
-            );
-        };
-        
-        const DeepEvalView = ({ onBack }) => {
-             const { apiFetch, loading, error, setError } = useApi();
-            const [metrics, setMetrics] = useState([]);
-            const [selectedMetrics, setSelectedMetrics] = useState([]);
-            const [testCases, setTestCases] = useState([{ id: Date.now(), input: '', actual_output: '' }]);
-            const [result, setResult] = useState(null);
-            const [evalType, setEvalType] = useState('single'); // single, multi, dataset
-
-            useEffect(() => {
-                apiFetch('/v1/deepeval/metrics').then(data => {
-                    if (data) setMetrics(data);
-                });
-            }, []);
-
-            const handleMetricToggle = (metric) => {
-                if (evalType === 'single') {
-                    setSelectedMetrics([metric]);
-                } else {
-                     setSelectedMetrics(prev => 
-                        prev.includes(metric) ? prev.filter(m => m !== metric) : [...prev, metric]
-                    );
-                }
-            };
-            
-            const handleTestCaseChange = (id, field, value) => {
-                setTestCases(prev => prev.map(tc => tc.id === id ? {...tc, [field]: value} : tc));
-            }
-            
-            const addTestCase = () => setTestCases(prev => [...prev, { id: Date.now(), input: '', actual_output: '' }]);
-
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                setError(null);
-                setResult(null);
-
-                const cleanTestCases = testCases.map(({id, ...rest}) => rest).filter(tc => tc.input && tc.actual_output);
-                if (cleanTestCases.length === 0) {
-                    setError({ detail: "Please provide at least one valid test case." });
-                    return;
-                }
-                
-                let response;
-                if (evalType === 'single') {
-                    response = await apiFetch('/v1/deepeval/metric/evaluate', 'POST', {
-                        metric: selectedMetrics[0],
-                        test_case: cleanTestCases[0]
-                    });
-                } else if (evalType === 'multi') {
-                     response = await apiFetch('/v1/deepeval/multi_evaluate', 'POST', {
-                        metrics: selectedMetrics,
-                        test_case: cleanTestCases[0]
-                    });
-                } else { // dataset
-                     response = await apiFetch('/v1/deepeval/dataset/evaluate', 'POST', {
-                        metrics: selectedMetrics,
-                        test_cases: cleanTestCases
-                    });
-                }
-                
-                if (response) setResult(response);
-            };
-
-            return (
-                <div className="container">
-                    <div className="header">
-                        <h2>DeepEval Framework</h2>
-                        <button onClick={onBack} className="nav-button">Back to Categories</button>
-                    </div>
-                    
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label className="label">Evaluation Type</label>
-                            <select className="input" value={evalType} onChange={e => setEvalType(e.target.value)}>
-                                <option value="single">Single Metric</option>
-                                <option value="multi">Multi-Metric (Single Case)</option>
-                                <option value="dataset">Dataset (Multi-Case)</option>
-                            </select>
-                        </div>
-                        
-                        <div className="form-group">
-                            <label className="label">Select Metrics</label>
-                            {metrics.length > 0 ? (
-                                metrics.map(metric => (
-                                    <div key={metric}>
-                                        <input
-                                            type={evalType === 'single' ? 'radio' : 'checkbox'}
-                                            name="deepeval-metric"
-                                            id={`de-metric-${metric}`}
-                                            checked={selectedMetrics.includes(metric)}
-                                            onChange={() => handleMetricToggle(metric)}
-                                        />
-                                        <label htmlFor={`de-metric-${metric}`} style={{marginLeft: "8px"}}>{metric}</label>
-                                    </div>
-                                ))
-                            ) : <p>Loading metrics...</p>}
-                        </div>
-
-                        <h3>Test Cases</h3>
-                        {testCases.map((tc, index) => (
-                          <div key={tc.id} style={{ border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '5px', marginBottom: '1rem' }}>
-                            <h4>Test Case {index + 1}</h4>
-                            <div className="form-group">
-                                <label className="label">Input</label>
-                                <textarea className="input" value={tc.input} onChange={e => handleTestCaseChange(tc.id, 'input', e.target.value)}></textarea>
-                            </div>
-                            <div className="form-group">
-                                <label className="label">Actual Output</label>
-                                <textarea className="input" value={tc.actual_output} onChange={e => handleTestCaseChange(tc.id, 'actual_output', e.target.value)}></textarea>
-                            </div>
-                            { (evalType !== 'single' && evalType !== 'multi') && index === testCases.length - 1 &&
-                                <button type="button" onClick={addTestCase}>Add Another Test Case</button>
-                            }
-                          </div>
-                        ))}
-                        
-                        <button type="submit" disabled={loading || selectedMetrics.length === 0}>
-                            {loading ? 'Evaluating...' : 'Evaluate with DeepEval'}
-                        </button>
-                    </form>
-                    
-                    {loading && <Loader />}
-                    <ResponseDisplay title="Evaluation Result" data={result} error={error} />
-                </div>
-            );
-        };
-
-        const App = () => {
-            const { isLoggedIn, logout } = useContext(AuthContext);
-            const [category, setCategory] = useState(null); // 'preset', 'custom', 'deepeval'
-
-            const handleSelectCategory = (selectedCategory) => {
-                setCategory(selectedCategory);
-            };
-
-            const handleBack = () => {
-                setCategory(null);
-            };
-            
-            const handleLogout = () => {
-                logout();
-                setCategory(null);
-            };
-
-            if (!isLoggedIn) {
-                return <LoginScreen />;
-            }
-            
-            if (!category) {
-                 return <CategorySelectionScreen onSelectCategory={handleSelectCategory} onLogout={handleLogout} />;
-            }
-            
-            return (
-                <>
-                  {category === 'preset' && <PresetMetricsView onBack={handleBack} />}
-                  {category === 'custom' && <CustomMetricView onBack={handleBack} />}
-                  {category === 'deepeval' && <DeepEvalView onBack={handleBack} />}
-                </>
-            );
-        };
-
-        const Root = () => (
-            <AuthProvider>
-                <App />
-            </AuthProvider>
-        );
-
-        // ** Fix for React 18 **
-        // The following lines have been updated from the deprecated ReactDOM.render
-        const container = document.getElementById('root');
-        const root = ReactDOM.createRoot(container);
-        root.render(<Root />);
-    </script>
+      try {
+        const res = await fetch('/v1/llm/generate_with_eval', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + credentials
+          },
+          body: JSON.stringify({
+            messages: [{ role: 'user', content: prompt }],
+            model: 'sonar-pro',
+            eval_config: { enabled: true, metrics, wait_for_results: true }
+          })
+        });
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        responseText.textContent = data.response;
+        const results = data.evaluation?.results || {};
+        for (const [metric, result] of Object.entries(results)) {
+          const li = document.createElement('li');
+          li.innerHTML = \`<span class="badge text-light">\${metric}</span>: \${JSON.stringify(result)}\`;
+          evalResults.appendChild(li);
+        }
+      } catch (err) {
+        responseText.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
 </body>
 </html>
